@@ -1,4 +1,5 @@
 import sys
+import numpy as NP
 
 class Neuron:
     ID = 0 # identifies the neuron
@@ -6,6 +7,7 @@ class Neuron:
     weights = [] # list of weights of the Neurons
     N = 0 # total number of Neurons
     storedPatterns = []
+    state = 0
 
     def __init__(self, ID, N, p):
         self.ID = ID
@@ -38,3 +40,8 @@ class Neuron:
             w=1/self.N*sumResult
             self.weights.append(w)
 
+    def singleStep(self, input):
+        sumResult=0
+        for i in range(len(self.inputs)):
+            sumResult+=self.weights[i]* input[i]
+        self.state=NP.sign(sumResult)
