@@ -9,21 +9,14 @@ class Neuron:
     storedPatterns = []
     state = 0
 
-    def __init__(self, ID, N, p):
+    def __init__(self, ID, N):
         self.ID = ID
         self.N = N
 
 
-    def getId(self):
-        return self.ID
-
-    def getPatternValue(self,i):
-        return self.storedPatterns[i]
-
-
     def connectHopfield(self , Neurons):
         for i in range(len(Neurons)):
-            if Neurons[i].getID() != self.ID:
+            if Neurons[i].ID != self.ID:
                 self.inputs.append(i)
 
     def storePattern(self, pattern):
@@ -36,12 +29,15 @@ class Neuron:
         for i in range(len(self.inputs)):
             sumResult=0
             for j in range(len(self.storedPatterns)):
-                sumResult+=self.inputs[i].getPatternValue(j)*self.storedPatterns[j]
+                sumResult+=self.inputs[i].storedPattern[j]*self.storedPatterns[j]
             w=1/self.N*sumResult
             self.weights.append(w)
 
-    def singleStep(self, input):
+    def singleStep(self):
         sumResult=0
         for i in range(len(self.inputs)):
-            sumResult+=self.weights[i]* input[i]
+            sumResult+=self.weights[i]* self.inputs[i].state
         self.state=NP.sign(sumResult)
+
+
+
