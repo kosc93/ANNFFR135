@@ -27,7 +27,7 @@ class Network:
             self.neurons[i].singleStep()
 
 if __name__ == '__main__':
-    N=100
+    N=110
     p=20
     patterns=np.random.random_integers(0,1,size=(p,N))
     n= Network(N,p)
