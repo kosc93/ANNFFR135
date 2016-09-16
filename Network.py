@@ -2,9 +2,10 @@ from Neuron import *
 import random as rand
 import numpy as np
 import matplotlib.pyplot as plot
+import time, math
 
 
-# todo calculate weightmatrix in network and store it in neurons for more flexibility
+# todo calculate weight matrix in network class and store it in neurons for more flexibility
 
 
 class Network:
@@ -33,8 +34,30 @@ class Network:
 
 if __name__ == '__main__':
     N = 100
-    p = 20
+    p = 80
     patterns = np.random.random_integers(0, 1, size=(p, N))
     n = Network(N, p)
     n.storePatterns(patterns)
-    a = 1
+
+    errors = []
+    res = 0
+
+    res = []
+    resw = []
+    for neuron in n.neurons:
+        res.append(neuron.storedPatterns)
+        resw.append(neuron.weights)
+    fig = plot.figure(1)
+    plot.subplot(311)
+    plot.imshow(patterns)
+    plot.subplot(312)
+    plot.imshow(np.transpose(res))
+    plot.subplot(313)
+    plot.imshow(resw)
+    plot.show()
+    while 1:
+        n.runHopfield(patterns)
+        for i in range(len(n.neurons)):
+            res += n.neurons[i].stepError
+        errors.append(res * 1.0 / N)
+        time.sleep(1)

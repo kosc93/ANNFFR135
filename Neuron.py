@@ -11,6 +11,7 @@ class Neuron:
         self.storedPatterns = []
         self.state = 0
         self.nextState = 0
+        self.stepError = 0
 
     def connectHopfield(self, Neurons):
         for i in range(len(Neurons)):
@@ -31,11 +32,26 @@ class Neuron:
             w = sumResult * 1.0 / self.N
             self.weights.append(w)
 
-    def singleStep(self):
+    def singleStep(self, pattern=-1):
         sumResult = 0
         for i in range(len(self.inputs)):
             sumResult += self.weights[i] * self.inputs[i].state
         self.nextState = NP.sign(sumResult)
+        if pattern >= 0:
+            self.calcPerror(pattern)
 
     def transferStates(self):
         self.state = self.nextState
+
+    def calcPerror(self, pattern):
+        sum = 0
+        for i in range(len(self.inputs)):
+            for j in range(len(self.storedPatterns)):
+                if pattern != j:
+                    sum += self.storedPatterns[j] * self.inputs[j].storedPattern[j] * self.inputs[j].storedPattern[
+                        pattern]
+        c = -(self.storedPatterns[pattern] * 1.0 / self.N) * sum
+        if c > 0:
+            self.stepError = 1
+        else:
+            self.stepError = 0
