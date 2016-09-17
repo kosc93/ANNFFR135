@@ -15,8 +15,7 @@ class Neuron:
 
     def connectHopfield(self, Neurons):
         for i in range(len(Neurons)):
-            if Neurons[i].ID != self.ID:
-                self.inputs.append(Neurons[i])
+            self.inputs.append(Neurons[i])
 
     def storePattern(self, pattern):
         if len(pattern) == self.N:
@@ -26,10 +25,13 @@ class Neuron:
 
     def calcWeights(self):
         for i in range(len(self.inputs)):
-            sumResult = 0
-            for j in range(len(self.storedPatterns)):
-                sumResult += self.inputs[i].storedPatterns[j] * self.storedPatterns[j]
-            w = sumResult * 1.0 / self.N
+            if i == self.ID:
+                w=0
+            else:
+                sumResult = 0
+                for j in range(len(self.storedPatterns)):
+                    sumResult += self.inputs[i].storedPatterns[j] * self.storedPatterns[j]
+                w = sumResult * 1.0 / self.N
             self.weights.append(w)
 
     def singleStep(self, pattern=-1):
@@ -38,7 +40,7 @@ class Neuron:
             sumResult += self.weights[i] * self.inputs[i].state
         self.nextState = NP.sign(sumResult)
         if pattern >= 0:
-            self.calcPerror(pattern)
+            return self.calcPerror(pattern)
 
     def transferStates(self):
         self.state = self.nextState
@@ -46,12 +48,12 @@ class Neuron:
     def calcPerror(self, pattern):
         sum = 0
         for i in range(len(self.inputs)):
-            for j in range(len(self.storedPatterns)):
-                if pattern != j:
-                    sum += self.storedPatterns[j] * self.inputs[j].storedPattern[j] * self.inputs[j].storedPattern[
-                        pattern]
-        c = -(self.storedPatterns[pattern] * 1.0 / self.N) * sum
-        if c > 0:
-            self.stepError = 1
+            if i!= self.ID:
+                for j in range(len(self.storedPatterns)):
+                    if pattern != j:
+                        sum += self.storedPatterns[j]* self.inputs[i].storedPatterns[j] * self.inputs[j].state
+        c = -(self.state * 1.0 / self.N) * sum
+        if c > 1:
+            return 1
         else:
-            self.stepError = 0
+            return 0
