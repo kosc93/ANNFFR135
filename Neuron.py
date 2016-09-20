@@ -1,9 +1,8 @@
 import sys
 import numpy as NP
 
+
 class Neuron:
-
-
     def __init__(self, ID, N):
         self.ID = ID
         self.N = N
@@ -12,33 +11,49 @@ class Neuron:
         self.storedPatterns = []
         self.state = 0
         self.nextState = 0
+        self.stepError = 0
 
-
-    def connectHopfield(self , Neurons):
+    def connectHopfield(self, Neurons):
         for i in range(len(Neurons)):
-            if Neurons[i].ID != self.ID:
-                self.inputs.append(Neurons[i])
+            self.inputs.append(Neurons[i])
 
     def storePattern(self, pattern):
-        if len(pattern)==self.N:
+        if len(pattern) == self.N:
             self.storedPatterns.append(pattern[self.ID])
         else:
-          sys.exit("stored pattern has an incorrect size")
+            sys.exit("stored pattern has an incorrect size")
 
     def calcWeights(self):
         for i in range(len(self.inputs)):
-            sumResult = 0
-            for j in range(len(self.storedPatterns)):
-                sumResult+=self.inputs[i].storedPatterns[j]*self.storedPatterns[j]
-            w = sumResult*1.0/self.N
+            if i == self.ID:
+                w=0
+            else:
+                sumResult = 0
+                for j in range(len(self.storedPatterns)):
+                    sumResult += self.inputs[i].storedPatterns[j] * self.storedPatterns[j]
+                w = sumResult * 1.0 / self.N
             self.weights.append(w)
 
-    def singleStep(self):
-        sumResult=0
+    def singleStep(self, pattern=-1):
+        sumResult = 0
         for i in range(len(self.inputs)):
-            sumResult+=self.weights[i]* self.inputs[i].state
-        self.nextState=NP.sign(sumResult)
-
+            sumResult += self.weights[i] * self.inputs[i].state
+        self.nextState = NP.sign(sumResult)
+        if pattern >= 0:
+            return self.calcPerror(pattern)
 
     def transferStates(self):
-        self.state=self.nextState
+        self.state = self.nextState
+
+    def calcPerror(self, pattern):
+        sum = 0
+        for i in range(len(self.inputs)):
+            if i!= self.ID:
+                for j in range(len(self.storedPatterns)):
+                    if pattern != j:
+                        sum += self.storedPatterns[j]* self.inputs[i].storedPatterns[j] * self.inputs[j].state
+        c = -(self.state * 1.0 / self.N) * sum
+        if c > 1:
+            return 1
+        else:
+            return 0
