@@ -24,6 +24,7 @@ class Neuron:
             sys.exit("stored pattern has an incorrect size")
 
     def calcWeights(self):
+        self.weights = []
         for i in range(len(self.inputs)):
             if i == self.ID:
                 w=0
@@ -41,6 +42,19 @@ class Neuron:
         self.nextState = NP.sign(sumResult)
         if pattern >= 0:
             return self.calcPerror(pattern)
+
+    def asynchronousUpdate(self):
+        flipped = True
+        self.calcWeights()
+        sumResult = 0
+        for i in range(len(self.inputs)):
+            sumResult += self.weights[i] * self.inputs[i].state
+            #print 'self.weights[i] ', self.weights[i], ' --- self.inputs[i].state ', self.inputs[i].state
+        newState = NP.sign(sumResult)
+        if newState == self.state:
+            flipped = False
+        self.state = newState
+        return flipped
 
     def transferStates(self):
         self.state = self.nextState
