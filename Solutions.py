@@ -8,7 +8,6 @@ from datetime import datetime
 
 
 class Solution:
-
     def solvePartOne(self):
         # plot.ion()
         Ns = [100, 200]
@@ -120,7 +119,6 @@ class Solution:
 
         print 'It took ', datetime.now() - startTime, 'to complete this script.'
 
-
     def solvePartThree(self):
         pass
 
@@ -130,11 +128,11 @@ class Solution:
     def __init__(self, part):
         self.sol[part](self)
 
-    sol = { 1: solvePartOne,
-            2: solvePartTwo,
-            3: solvePartThree,
-            4: solvePartFour
-                }
+    sol = {1: solvePartOne,
+           2: solvePartTwo,
+           3: solvePartThree,
+           4: solvePartFour
+           }
 
 
 if __name__ == '__main__':

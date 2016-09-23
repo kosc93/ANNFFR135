@@ -27,7 +27,7 @@ class Neuron:
         self.weights = []
         for i in range(len(self.inputs)):
             if i == self.ID:
-                w=0
+                w = 0
             else:
                 sumResult = 0
                 for j in range(len(self.storedPatterns)):
@@ -51,10 +51,10 @@ class Neuron:
     def calcPerror(self, pattern):
         sum = 0
         for i in range(len(self.inputs)):
-            if i!= self.ID:
+            if i != self.ID:
                 for j in range(len(self.storedPatterns)):
                     if pattern != j:
-                        sum += self.storedPatterns[j]* self.inputs[i].storedPatterns[j] * self.inputs[j].state
+                        sum += self.storedPatterns[j] * self.inputs[i].storedPatterns[j] * self.inputs[j].state
         c = -(self.state * 1.0 / self.N) * sum
         if c > 1:
             return 1
