@@ -12,6 +12,8 @@ class Network:
     def __init__(self, N, p):
         self.neurons=[]
         self.errors=[]
+        self.oldState=[]
+        self.newState=[]
         rand.seed(rand.random())
         for i in range(N):
             neuron=Neuron(i, N)
@@ -42,15 +44,32 @@ class Network:
         netState = []
         for i in range(len(self.neurons)):
             netState.append(self.neurons[i].state)
-        return netState
+        return np.array(netState)
 
-    def updateHopfieldAsynchronous(self):
-        stateChange = False
-        for j in np.random.permutation(len(self.neurons)):      # update all neurons once, but in random order
-            change = self.neurons[j].asynchronousUpdate()
-            if change == True:
-                stateChange = True
-        return stateChange
+    def distortPattern(self,q,pattern):
+        workPattern = np.array(pattern)
+        flippedBits = int(q * len(pattern))
+        bitPosition = np.random.choice(len(pattern), flippedBits, replace=False)
+        workPattern[bitPosition] = -pattern[bitPosition]
+        return workPattern
+
+
+    def runDigits(self, pattern, origPattern):
+        self.inputPattern(pattern)
+        self.oldState=self.getCurrentNetworkState()
+        indexes = np.random.permutation(len(self.neurons))
+        for number in indexes:
+            self.neurons[number].singleStep(synchronus=False)
+        self.newState=self.getCurrentNetworkState()
+        if np.all(self.oldState-self.newState==np.zeros(len(self.oldState))):
+            if np.all(origPattern-self.newState==np.zeros(len(self.oldState))):
+                return 1 # found pattern
+            elif np.all(origPattern-self.newState==2*origPattern):
+                return 2 # found inverted pattern
+            else:
+                return 3 # found false stable pattern
+        self.oldState = self.newState
+        return 4 # did not found stable pattern
 
 
 
