@@ -56,10 +56,10 @@ class Solution:
 
     def solvePartTwo(self):
         startTime = datetime.now()  # for timing script
-        graphics = True  # for checking visually
+        graphics = False  # for checking visually
 
-        iterationsForEachPattern = 50
-        qSequence = np.linspace(0.0, 1.0, 21)
+        iterationsForEachPattern = 20
+        qSequence = np.linspace(0.0, 1.0, 41)
         probRightResultSequence = np.zeros(len(qSequence))
 
         lib = PatternLibrary()
@@ -82,27 +82,26 @@ class Solution:
             net.storePatterns(patterns)
 
             for i, thisInput in enumerate(patterns):
-                workPattern = net.distortPattern(q, thisInput)
 
                 if graphics:
                     ax.imshow(thisInput.reshape((16, 10)), cmap=plt.cm.binary, interpolation='nearest')
                     animation.canvas.draw()
 
                 for i in range(iterationsForEachPattern):
-                    status = net.runDigits(workPattern, thisInput)
-                    currentState = net.getCurrentNetworkState()
-                    workPattern = currentState
-                    if graphics:
-                        ax.imshow(currentState.reshape((16, 10)), cmap=plt.cm.binary, interpolation='nearest')
-                        animation.canvas.draw()
+                    workPattern = net.distortPattern(q, thisInput)
+                    while True:
+                        status = net.runDigits(workPattern, thisInput)
+                        currentState = net.getCurrentNetworkState()
+                        workPattern = currentState
+                        if graphics:
+                            ax.imshow(currentState.reshape((16, 10)), cmap=plt.cm.binary, interpolation='nearest')
+                            animation.canvas.draw()
 
-                    if status == 1 or status == 2:
-                        probRightResultSequence[iQ] += 1
-                        break;
-                    # if  status == 2:
-                    #     break;
-                    if status == 3:
-                        break;
+                        if status == 1 or status == 2:
+                            probRightResultSequence[iQ] += 1
+                            break
+                        if status == 3:
+                            break
 
             print 'q = ', q, ' ---> right: ', (1.0 / (iterationsForEachPattern * p)) * probRightResultSequence[iQ]
 
@@ -115,9 +114,8 @@ class Solution:
         plt.title('Deterministic Hopfield Pattern Recognition\nPerformance vs. Level of Pattern Distortion')
         plt.ylabel('Relative Frequency of Right Pattern Recognition')
         plt.xlabel("Probability of 'Flipping' for Each Bit")
-        plt.show()
-
         print 'It took ', datetime.now() - startTime, 'to complete this script.'
+        plt.show()
 
     def solvePartThree(self):
         pass
