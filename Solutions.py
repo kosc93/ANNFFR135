@@ -59,6 +59,7 @@ class Solution:
         graphics = False  # for checking visually
 
         iterationsForEachPattern = 20
+        maxIterations=50
         qSequence = np.linspace(0.0, 1.0, 41)
         probRightResultSequence = np.zeros(len(qSequence))
 
@@ -87,9 +88,9 @@ class Solution:
                     ax.imshow(thisInput.reshape((16, 10)), cmap=plt.cm.binary, interpolation='nearest')
                     animation.canvas.draw()
 
-                for i in range(iterationsForEachPattern):
+                for k in range(iterationsForEachPattern):
                     workPattern = net.distortPattern(q, thisInput)
-                    while True:
+                    for j in range(maxIterations):
                         status = net.runDigits(workPattern, thisInput)
                         currentState = net.getCurrentNetworkState()
                         workPattern = currentState
@@ -103,7 +104,7 @@ class Solution:
                         if status == 3:
                             break
 
-            print 'q = ', q, ' ---> right: ', (1.0 / (iterationsForEachPattern * p)) * probRightResultSequence[iQ]
+            print 'q = ', q, ' ---> right: ', 1.0 * probRightResultSequence[iQ] / (iterationsForEachPattern*p)
 
             if graphics:
                 plt.close("all")
