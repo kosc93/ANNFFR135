@@ -1,6 +1,7 @@
 from numpy import array
 from matplotlib import pylab as plt
 import time
+import numpy as np
 
 
 # Display all numbers with:
@@ -138,3 +139,22 @@ class PatternLibrary:
         allNumbers = [self.toPattern(x) for x in numberStrings]
         for number in allNumbers:
             self.savedPatterns.append(number)
+
+    def loadDataSet(self, fileName, normalize=True):
+        zeta=[]
+        xi=[]
+        data=open(fileName,"r")
+        for line in data:
+            parts=line.split(" ")
+            xi.append([float(parts[0]), float(parts[1])])
+            zeta.append(int(parts[2]))
+        data.close()
+        xi=np.array(xi)
+        zeta=np.array(zeta)
+        if normalize:
+            xi=xi/np.std(xi)
+            xi=xi-np.mean(xi)
+            zeta=zeta/np.std(zeta)
+            zeta=zeta-np.mean(zeta)
+        return zeta,xi
+

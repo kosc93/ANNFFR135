@@ -122,9 +122,10 @@ class Solution:
         startTime = datetime.now()  # for timing script
         graphics=True
         iterationPerPattern=5
-        maxIterations=100
+        maxIterations=350
         N=500
-        p=np.round(np.linspace(1,N,20))
+        p=np.round(np.linspace(1,N,10))
+        p=np.array([1, 5, 10, 25, 40, 50, 60, 100, 250, 330, 500])
         beta=2
         for pat in p:
             # set up animation
@@ -147,7 +148,8 @@ class Solution:
                 for nIteration in range(maxIterations):
                     n.runStochastic(workPattern)
                     workPattern=n.getCurrentNetworkState()
-                    m.append(n.orderParam)
+                    if nIteration%35==0:
+                        m.append(n.calcMMu(1))
                 if graphics:
                     ax.plot(m)
                     animation.canvas.draw()

@@ -9,7 +9,6 @@ class Network:
         self.errors = []
         self.oldState = []
         self.newState = []
-        self.orderParam = 0
         rand.seed(rand.random())
         for i in range(N):
             neuron = Neuron(i, N, beta)
@@ -71,7 +70,7 @@ class Network:
         indexes = np.random.permutation(len(self.neurons))
         for number in indexes:
             self.neurons[number].singleStep(synchronus=False,deterministic=False)
-        self.orderParam=self.calcMMu(1)
+
 
 
     def calcMMu(self,mu):

@@ -45,10 +45,11 @@ class Neuron:
         if deterministic:
             self.nextState = np.sign(sumResult)
         else:
-            res=int(np.round((0.5-0.5*np.tanh(self.beta*sumResult))*100.0)) #pretty experimental but i dont know how to draw a number randomly so that its averages to a given value
-            picker=np.ones(100)
-            picker[0:res]=-1
-            self.nextState=picker[np.random.choice(100,1)]
+            res=(0.5-0.5*np.tanh(self.beta*sumResult)) #propability of a -1
+            res=np.random.choice(2,1,p=[res,1-res])[0]
+            if res==0:
+                res=-1
+            self.nextState=res
             self.prevStates.append(self.nextState)
 
         if pattern >= 0:
