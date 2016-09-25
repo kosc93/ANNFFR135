@@ -119,7 +119,41 @@ class Solution:
         plt.show()
 
     def solvePartThree(self):
-        pass
+        startTime = datetime.now()  # for timing script
+        graphics=True
+        iterationPerPattern=5
+        maxIterations=100
+        N=500
+        p=np.round(np.linspace(1,N,20))
+        beta=2
+        for pat in p:
+            # set up animation
+
+            if graphics:
+                animation = plt.figure()
+                title = 'Compute order parameter m1:  alpha = ' + str(pat*1.0/N)
+                plt.title(title)
+                ax = animation.gca()
+                animation.show()
+
+            for pIteration in range(iterationPerPattern):
+
+                m = []
+                patterns = np.random.random_integers(0, 1, size=(int(pat), N))
+                patterns[patterns == 0] = -1
+                n = Network(N, pat,beta)
+                n.storePatterns(patterns)
+                workPattern=patterns[0]
+                for nIteration in range(maxIterations):
+                    n.runStochastic(workPattern)
+                    workPattern=n.getCurrentNetworkState()
+                    m.append(n.orderParam)
+                if graphics:
+                    ax.plot(m)
+                    animation.canvas.draw()
+                print 'It took ', datetime.now() - startTime, 'to complete this script.'
+
+
 
     def solvePartFour(self):
         pass
@@ -135,4 +169,4 @@ class Solution:
 
 
 if __name__ == '__main__':
-    Solution(2)
+    Solution(3)

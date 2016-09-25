@@ -1,9 +1,9 @@
 import sys
-import numpy as NP
+import numpy as np
 
 
 class Neuron:
-    def __init__(self, ID, N):
+    def __init__(self, ID, N, beta=0):
         self.ID = ID
         self.N = N
         self.inputs = []  # list of connected Neurons
@@ -12,6 +12,9 @@ class Neuron:
         self.state = 0
         self.nextState = 0
         self.stepError = 0
+        self.beta=beta
+        if beta>0:
+            self.prevStates=[]
 
     def connectHopfield(self, Neurons):
         for i in range(len(Neurons)):
@@ -35,11 +38,19 @@ class Neuron:
                 w = sumResult * 1.0 / self.N
             self.weights.append(w)
 
-    def singleStep(self, pattern=-1, synchronus=True):
+    def singleStep(self, pattern=-1, synchronus=True,deterministic=True):
         sumResult = 0
         for i in range(len(self.inputs)):
             sumResult += self.weights[i] * self.inputs[i].state
-        self.nextState = NP.sign(sumResult)
+        if deterministic:
+            self.nextState = np.sign(sumResult)
+        else:
+            res=int(np.round((0.5-0.5*np.tanh(self.beta*sumResult))*100.0)) #pretty experimental but i dont know how to draw a number randomly so that its averages to a given value
+            picker=np.ones(100)
+            picker[0:res]=-1
+            self.nextState=picker[np.random.choice(100,1)]
+            self.prevStates.append(self.nextState)
+
         if pattern >= 0:
             return self.calcPerror(pattern)
         if not synchronus:
@@ -47,6 +58,8 @@ class Neuron:
 
     def transferStates(self):
         self.state = self.nextState
+
+
 
     def calcPerror(self, pattern):
         sum = 0

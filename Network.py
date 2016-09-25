@@ -4,14 +4,15 @@ import numpy as np
 
 
 class Network:
-    def __init__(self, N, p):
+    def __init__(self, N, p,beta=0):
         self.neurons = []
         self.errors = []
         self.oldState = []
         self.newState = []
+        self.orderParam = 0
         rand.seed(rand.random())
         for i in range(N):
-            neuron = Neuron(i, N)
+            neuron = Neuron(i, N, beta)
             self.neurons.append(neuron)
         for i in range(len(self.neurons)):
             self.neurons[i].connectHopfield(self.neurons)
@@ -64,3 +65,18 @@ class Network:
                 return 3  # found false stable pattern
         self.oldState = self.newState
         return 4  # did not found stable pattern
+
+    def runStochastic(self, pattern):
+        self.inputPattern(pattern)
+        indexes = np.random.permutation(len(self.neurons))
+        for number in indexes:
+            self.neurons[number].singleStep(synchronus=False,deterministic=False)
+        self.orderParam=self.calcMMu(1)
+
+
+    def calcMMu(self,mu):
+        sumResult=0
+        for  thisNeuron in self.neurons:
+            sumResult+=thisNeuron.storedPatterns[mu-1]*np.mean(thisNeuron.prevStates)
+        mmu=sumResult*1.0/len(self.neurons)
+        return mmu
