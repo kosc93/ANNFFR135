@@ -26,7 +26,7 @@ class Solution:
                 np.random.seed(seed=int(time.time() % 100))
                 patterns = np.random.random_integers(0, 1, size=(p, N))
                 patterns[patterns == 0] = -1
-                n = Network(N, p)
+                n = Network(N)
                 n.storePatterns(patterns)
 
                 # res=[]
@@ -79,7 +79,7 @@ class Solution:
             #     ax = animation.gca()
             #     animation.show()
 
-            net = Network(N, p)
+            net = Network(N)
             net.storePatterns(patterns)
 
             for i, thisInput in enumerate(patterns):
@@ -124,8 +124,14 @@ class Solution:
         iterationPerPattern=5
         maxIterations=500
         N=500
+        N=250
+        N=100
+        N=50
         p=np.round(np.linspace(1,N,50))
         p=np.array([1,3,7, 5,10,15,20,25,30, 40, 50, 60, 100,170,250, 300,400, 500])
+        p=np.ceil(p/2.0)
+        p=np.array([1,2,3,4,5,6,7,10,12,15,30,50,70,100])
+        p = np.array([1, 2, 3, 4, 5, 6, 7,8,9, 10, 12, 15, 30, 50])
         beta=2
         for pat in p:
             # set up animation
@@ -138,11 +144,10 @@ class Solution:
             #     animation.show()
             mMean=[]
             for pIteration in range(iterationPerPattern):
-
                 m = []
                 patterns = np.random.random_integers(0, 1, size=(int(pat), N))
                 patterns[patterns == 0] = -1
-                n = Network(N, pat,beta)
+                n = Network(N,beta)
                 n.storePatterns(patterns)
                 workPattern=patterns[0]
                 for nIteration in range(maxIterations):
@@ -159,7 +164,12 @@ class Solution:
 
 
     def solvePartFour(self):
-        pass
+        N=10
+        beta=0.5
+        Input=[0,1,2,3]
+        Output=[4,5,6,7,8,9]
+        n=Network(N,beta,Input,Output)
+
 
     def __init__(self, part):
         self.sol[part](self)
@@ -172,4 +182,4 @@ class Solution:
 
 
 if __name__ == '__main__':
-    Solution(3)
+    Solution(4)
