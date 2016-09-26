@@ -2,7 +2,7 @@ from Network import *
 from PatternLibrary import *
 import numpy as np
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 from datetime import datetime
 
@@ -72,21 +72,21 @@ class Solution:
         for iQ, q in enumerate(qSequence):
 
             # set up animation
-            if graphics:
-                animation = plt.figure()
-                title = 'Hopfield Net Asynchronous Updating:  q = ' + str(q)
-                plt.title(title)
-                ax = animation.gca()
-                animation.show()
+            # if graphics:
+            #     animation = plt.figure()
+            #     title = 'Hopfield Net Asynchronous Updating:  q = ' + str(q)
+            #     plt.title(title)
+            #     ax = animation.gca()
+            #     animation.show()
 
             net = Network(N, p)
             net.storePatterns(patterns)
 
             for i, thisInput in enumerate(patterns):
 
-                if graphics:
-                    ax.imshow(thisInput.reshape((16, 10)), cmap=plt.cm.binary, interpolation='nearest')
-                    animation.canvas.draw()
+                # if graphics:
+                #     ax.imshow(thisInput.reshape((16, 10)), cmap=plt.cm.binary, interpolation='nearest')
+                #     animation.canvas.draw()
 
                 for k in range(iterationsForEachPattern):
                     workPattern = net.distortPattern(q, thisInput)
@@ -94,9 +94,9 @@ class Solution:
                         status = net.runDigits(workPattern, thisInput)
                         currentState = net.getCurrentNetworkState()
                         workPattern = currentState
-                        if graphics:
-                            ax.imshow(currentState.reshape((16, 10)), cmap=plt.cm.binary, interpolation='nearest')
-                            animation.canvas.draw()
+                        # if graphics:
+                        #     ax.imshow(currentState.reshape((16, 10)), cmap=plt.cm.binary, interpolation='nearest')
+                        #     animation.canvas.draw()
 
                         if status == 1 or status == 2:
                             probRightResultSequence[iQ] += 1
@@ -106,37 +106,37 @@ class Solution:
 
             print 'q = ', q, ' ---> right: ', 1.0 * probRightResultSequence[iQ] / (iterationsForEachPattern*p)
 
-            if graphics:
-                plt.close("all")
+            # if graphics:
+            #     plt.close("all")
 
         probRightResultSequence = (1.0 / (iterationsForEachPattern * p)) * probRightResultSequence
 
-        plt.plot(qSequence, probRightResultSequence, lw=3.0)
-        plt.title('Deterministic Hopfield Pattern Recognition\nPerformance vs. Level of Pattern Distortion')
-        plt.ylabel('Relative Frequency of Right Pattern Recognition')
-        plt.xlabel("Probability of 'Flipping' for Each Bit")
-        print 'It took ', datetime.now() - startTime, 'to complete this script.'
-        plt.show()
+        # plt.plot(qSequence, probRightResultSequence, lw=3.0)
+        # plt.title('Deterministic Hopfield Pattern Recognition\nPerformance vs. Level of Pattern Distortion')
+        # plt.ylabel('Relative Frequency of Right Pattern Recognition')
+        # plt.xlabel("Probability of 'Flipping' for Each Bit")
+        # print 'It took ', datetime.now() - startTime, 'to complete this script.'
+        # plt.show()
 
     def solvePartThree(self):
         startTime = datetime.now()  # for timing script
-        graphics=True
+        graphics=False
         iterationPerPattern=5
-        maxIterations=350
+        maxIterations=500
         N=500
-        p=np.round(np.linspace(1,N,10))
-        p=np.array([1, 5, 10, 25, 40, 50, 60, 100, 250, 330, 500])
+        p=np.round(np.linspace(1,N,50))
+        p=np.array([1,3,7, 5,10,15,20,25,30, 40, 50, 60, 100,170,250, 300,400, 500])
         beta=2
         for pat in p:
             # set up animation
 
-            if graphics:
-                animation = plt.figure()
-                title = 'Compute order parameter m1:  alpha = ' + str(pat*1.0/N)
-                plt.title(title)
-                ax = animation.gca()
-                animation.show()
-
+            # if graphics:
+            #     animation = plt.figure()
+            #     title = 'Compute order parameter m1:  alpha = ' + str(pat*1.0/N)
+            #     plt.title(title)
+            #     ax = animation.gca()
+            #     animation.show()
+            mMean=[]
             for pIteration in range(iterationPerPattern):
 
                 m = []
@@ -150,11 +150,12 @@ class Solution:
                     workPattern=n.getCurrentNetworkState()
                     if nIteration%35==0:
                         m.append(n.calcMMu(1))
-                if graphics:
-                    ax.plot(m)
-                    animation.canvas.draw()
-                print 'It took ', datetime.now() - startTime, 'to complete this script.'
-
+                mMean.append(np.mean(m[-5:]))
+                # if graphics:
+                #     ax.plot(m)
+                #     animation.canvas.draw()
+            print 'alpha:', pat*1.0/N, ' m: ' , np.mean(mMean)
+        print 'It took ', datetime.now() - startTime, 'to complete this script.'
 
 
     def solvePartFour(self):
