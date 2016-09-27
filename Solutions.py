@@ -158,9 +158,10 @@ class Solution:
                 workPattern=patterns[0]
                 for nIteration in range(maxIterations):
                     n.runStochastic(workPattern)
-                    workPattern=n.getCurrentNetworkState()
-                    m.append(n.calcMMu(1))
-                mMean.append(np.mean(m[transientLength:]))
+                    if nIteration >= transientLength:
+                        workPattern=n.getCurrentNetworkState()
+                        m.append(n.calcMMu(1))
+                mMean.append(np.mean(m))
                 # if graphics:
                 #     ax.plot(m)
                 #     animation.canvas.draw()
@@ -183,7 +184,7 @@ class Solution:
         for training in range(numTrainings):
             errors = []
             n=Network(N,beta,Input,Output,Hidden)
-            for iter in iterations:
+            for iter in range(iterations):
                 xi=xis[np.random.randint(0,len(xis))]
                 zeta=zetas[np.random.randint(0,len(zetas))]
                 n.trainFF(xi,zeta)
@@ -203,4 +204,4 @@ class Solution:
 
 
 if __name__ == '__main__':
-    Solution(4)
+    Solution(3)
