@@ -164,13 +164,27 @@ class Solution:
 
 
     def solvePartFour(self):
-        N=10
+        iterations=100000
+        numTrainings=100
         beta=0.5
-        Input=[0,1,2,3]
-        Output=[4,5,6,7,8,9]
-        n=Network(N,beta,Input,Output)
-
-
+        Input=[0,1]
+        Hidden=[2]
+        Output=[3]
+        N=len(Input)+len(Output)+len(Hidden)
+        lib=PatternLibrary()
+        zetas,xis=lib.loadDataSet("trainingSet.txt")
+        for training in range(numTrainings):
+            errors = []
+            n=Network(N,beta,Input,Output,Hidden)
+            for iter in iterations:
+                xi=xis[np.random.randint(0,len(xis))]
+                zeta=zetas[np.random.randint(0,len(zetas))]
+                n.trainFF(xi,zeta)
+                if iter%1000 or iter>95000:
+                    error=n.calcError(zetas,xis)
+                    errors.append(error)
+                    print 'iter: ', iter, ' error:', error
+                    
     def __init__(self, part):
         self.sol[part](self)
 

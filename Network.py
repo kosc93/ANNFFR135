@@ -57,7 +57,7 @@ class Network:
 
     def getCurrentNetworkState(self):
         netState = np.array([])
-        for neuron in self.neurons:
+        for neuron in self.outputs:
             netState=np.append(netState,neuron.state)
         return netState
 
@@ -112,5 +112,15 @@ class Network:
         for neuron in self.outputs:
             neuron.updateFF(desiredState,hidden=self.hiddens)
         for neuron in self.hiddens:
-            neuron.updateFF(desiredState,output=self.outputs)
+            neuron.updateFF(desiredState,output=self.outputs,input=self.inputs)
 
+    def calcError(self,zetas=[],xis=[]):
+        sumRes=0
+        for i,xi in enumerate(xis):
+            self.inputPattern(xi)
+            runNeurons = np.append(self.hiddens, self.outputs)
+            for neuron in runNeurons:
+                neuron.singleStep(synchronus=False, deterministic=False)
+            res=zetas[i]-np.sign(np.tanh(self.outputs[0].beta*self.outputs[0].rawOutput))
+            sumRes+=np.abs(res)
+        return sumRes/2.0*len(xis)
