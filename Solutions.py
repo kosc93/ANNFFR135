@@ -133,7 +133,11 @@ class Solution:
         p=np.array([1,2,3,4,5,6,7,10,12,15,30,50,70,100])
         p = np.array([1, 2, 3, 4, 5, 6, 7,8,9, 10, 12, 15, 30, 50])
         beta=2
+        transientLength = 200
+        alphaSequence = 1.0 * p / N
+        mSequence = []
         for pat in p:
+            print "\npatterns:", pat,
             # set up animation
 
             # if graphics:
@@ -143,7 +147,9 @@ class Solution:
             #     ax = animation.gca()
             #     animation.show()
             mMean=[]
+            print '---> iteration: ',
             for pIteration in range(iterationPerPattern):
+                print pIteration + 1,
                 m = []
                 patterns = np.random.random_integers(0, 1, size=(int(pat), N))
                 patterns[patterns == 0] = -1
@@ -153,12 +159,13 @@ class Solution:
                 for nIteration in range(maxIterations):
                     n.runStochastic(workPattern)
                     workPattern=n.getCurrentNetworkState()
-                    if nIteration%35==0:
-                        m.append(n.calcMMu(1))
-                mMean.append(np.mean(m[-5:]))
+                    m.append(n.calcMMu(1))
+                mMean.append(np.mean(m[transientLength:]))
                 # if graphics:
                 #     ax.plot(m)
                 #     animation.canvas.draw()
+            mSequence.append(np.mean(mMean))
+            print datetime.now() - startTime
             print 'alpha:', pat*1.0/N, ' m: ' , np.mean(mMean)
         print 'It took ', datetime.now() - startTime, 'to complete this script.'
 
