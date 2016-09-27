@@ -4,7 +4,7 @@ import numpy as np
 
 
 class Network:
-    def __init__(self, N,beta=0,Input=[],Output=[],Hidden=[]):
+    def __init__(self, N,beta=0,Input=[],Output=[],Hidden=[],eta=0):
         self.neurons = np.array([])
         self.errors = []
         self.oldState = []
@@ -14,7 +14,7 @@ class Network:
         self.outputs=np.array([])
         rand.seed(rand.random())
         for i in range(N):
-            neuron = Neuron(i, N, beta)
+            neuron = Neuron(i, N, beta,0,eta)
             self.neurons=np.append(self.neurons,neuron)
         if len(Input)==0:
             for neuron in self.neurons:
@@ -108,11 +108,12 @@ class Network:
         self.inputPattern(pattern)
         runNeurons=np.append(self.hiddens,self.outputs)
         for neuron in runNeurons:
-                neuron.singleStep(synchronus=False,deterministic=False)
+                neuron.singleStep(synchronus=False,deterministic=False,continuous=True)
         for neuron in self.outputs:
             neuron.updateFF(desiredState,hidden=self.hiddens)
         for neuron in self.hiddens:
             neuron.updateFF(desiredState,output=self.outputs,input=self.inputs)
+        pass
 
     def calcError(self,zetas=[],xis=[]):
         sumRes=0
@@ -120,7 +121,7 @@ class Network:
             self.inputPattern(xi)
             runNeurons = np.append(self.hiddens, self.outputs)
             for neuron in runNeurons:
-                neuron.singleStep(synchronus=False, deterministic=False)
-            res=zetas[i]-np.sign(np.tanh(self.outputs[0].beta*self.outputs[0].rawOutput))
+                neuron.singleStep(synchronus=False, deterministic=False,continuous=True)
+            res=zetas[i]-np.sign(self.outputs[0].rawOutput)
             sumRes+=np.abs(res)
-        return sumRes/2.0*len(xis)
+        return sumRes/(2.0*len(xis))

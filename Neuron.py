@@ -43,20 +43,23 @@ class Neuron:
             self.weights=np.append(self.weights,w)
 
 
-    def singleStep(self, pattern=-1, synchronus=True,deterministic=True):
+    def singleStep(self, pattern=-1, synchronus=True,deterministic=True,continuous=False):
         sumResult = 0
         for i in range(len(self.inputs)):
             sumResult += self.weights[i] * self.inputs[i].state
         if deterministic:
             self.nextState = np.sign(sumResult-self.bias)
         else:
-            self.rawOutput=np.tanh(self.beta*sumResult-self.bias)
-            res=(0.5-0.5*self.rawOutput) #propability of a -1
-            res=np.random.choice(2,1,p=[res,1-res])[0]
-            if res==0:
-                res=-1
-            self.nextState=res
-            self.prevStates.append(self.nextState)
+            self.rawOutput=np.tanh(self.beta*sumResult-self.bias) # =g(b)
+            if continuous:
+                self.nextState=self.rawOutput
+            else:
+                res=(0.5-0.5*self.rawOutput) #propability of a -1
+                res=np.random.choice(2,1,p=[res,1-res])[0]
+                if res==0:
+                    res=-1
+                self.nextState=res
+                self.prevStates.append(self.nextState)
         if pattern >= 0:
             return self.calcPerror(pattern)
         if not synchronus:
@@ -81,22 +84,26 @@ class Neuron:
             return 0
 
     def updateFF(self, desiredState,input=[],output=[],hidden=[]):
-        if not output:
-            if not hidden:
+        if output==[]:
+            if  hidden==[]:
                 #update biases and weights of  Output without hidden layer
                 pass
-            elif hidden:
+            else :
                 #update biases and weights of  Output with hidden layer
+                dn = (desiredState - self.rawOutput) * self.beta * (1 - self.rawOutput * self.rawOutput)
+                for i,hid in enumerate(hidden):
+                    self.weights[i]+=self.eta*dn*hid.rawOutput
+                self.bias+=self.eta*-1.0*dn
                 pass
         else:
             #update update biases and weights of  hidden layer
             sumRes=0
-            gb = self.beta * (1 - np.tanh(self.beta * self.rawOutput) * np.tanh(self.beta * self.rawOutput))
+            gj = self.beta * (1 - self.rawOutput * self.rawOutput)
+            for i, neuron in enumerate(output):
+                dn = (desiredState - neuron.rawOutput) * neuron.beta * (1 - neuron.rawOutput * neuron.rawOutput)
+                Wi = neuron.weights[int(np.where(neuron.inputs == self)[0])]
+                sumRes += dn * Wi
             for w,inp in enumerate(input):
-                for i,neuron in enumerate(output):
-                    dn=(desiredState-np.tanh(neuron.rawOutput))*neuron.beta*(1-np.tanh(neuron.beta*neuron.rawOutput)*np.tanh(neuron.beta*neuron.rawOutput))
-                    Wi=neuron.weights[int(np.where(neuron.inputs==self)[0])]
-                    sumRes+=dn*Wi
-                self.weights[w]+=self.eta*sumRes*gb*inp.state
-            self.bias+=self.eta*sumRes*-gb
+                self.weights[w]+=self.eta*sumRes*gj*inp.state
+            self.bias+=self.eta*sumRes*-gj
             pass
