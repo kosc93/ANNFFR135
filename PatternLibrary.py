@@ -152,7 +152,9 @@ class PatternLibrary:
         xi=np.array(xi)
         zeta=np.array(zeta)
         if normalize:
-            xi=xi/np.std(xi)
-            xi=xi-np.mean(xi)
+            xi[:, 0] = xi[:,0] / np.std(xi[:, 0])
+            xi[:, 0] = xi[:, 0] - np.mean(xi[:, 0])
+            xi[:,1]=xi[:,1]/np.std(xi[:,1])
+            xi[:,1]=xi[:,1]-np.mean(xi[:,1])
         return zeta,xi
 

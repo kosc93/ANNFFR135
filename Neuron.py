@@ -84,13 +84,16 @@ class Neuron:
             return 0
 
     def updateFF(self, desiredState,output=[],hidden=[]):
-        if output==[]:
-            if  hidden==[]:
+        if len(output)==0:
+            if  len(hidden)==0:
                 #update biases and weights of  Output without hidden layer
+                for i,neuron in enumerate(self.inputs):
+                    self.weights[i]+=self.eta*(desiredState-self.rawOutput)*neuron.state
+                self.bias-=self.eta*(desiredState-self.rawOutput)
                 pass
             else :
                 #update biases and weights of  Output with hidden layer
-                dn = (desiredState - self.rawOutput) * self.beta * (1 - self.rawOutput * self.rawOutput)
+                dn = (desiredState - self.rawOutput) * self.beta * (1 - (self.rawOutput * self.rawOutput))
                 for i,hid in enumerate(hidden):
                     self.weights[i]+=self.eta*dn*hid.rawOutput
                 self.bias-=self.eta*dn
@@ -98,9 +101,9 @@ class Neuron:
         else:
             #update update biases and weights of  hidden layer
             sumRes=0
-            gj = self.beta * (1 - self.rawOutput * self.rawOutput)
+            gj = self.beta * (1 - (self.rawOutput * self.rawOutput))
             for i, neuron in enumerate(output):
-                dn = (desiredState - neuron.rawOutput) * neuron.beta * (1 - neuron.rawOutput * neuron.rawOutput)
+                dn = (desiredState - neuron.rawOutput) * neuron.beta * (1 -( neuron.rawOutput * neuron.rawOutput))
                 Wi = neuron.weights[int(np.where(neuron.inputs == self)[0])]
                 sumRes += dn * Wi
             for w,inp in enumerate(self.inputs):
