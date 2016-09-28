@@ -2,7 +2,7 @@ from Network import *
 from PatternLibrary import *
 import numpy as np
 
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 from datetime import datetime
 
@@ -175,45 +175,59 @@ class Solution:
         graphics=True
         iterations=100000
         numTrainings=100
+        numHidden=0
         beta=0.5
         eta=0.01
-        Input=[0,1]
-        Hidden=[]
-        Output=[2]
+        Input=range(2)
+        Hidden=range(2,2+numHidden)
+        Output=[2+numHidden]
         N=len(Input)+len(Output)+len(Hidden)
         lib=PatternLibrary()
         zetas,xis=lib.loadDataSet("trainingSet.txt")
         xi1=xis[:,0]
         xi2=xis[:,1]
+        outputlines=[]
+        hiddenlines=[]
         for training in range(numTrainings):
             errors = [1]
-            # if graphics:
-            #     fig = plt.figure()
-            #     line, = plt.plot(np.arange(10))
-            #     t = np.linspace(-1, 1, num=10)
-            #     line.set_xdata(t)
-            #     plt.xlim([-3, 3])
-            #     plt.ylim([-3, 3])
-            #     plt.plot(xi1[zetas == 1], xi2[zetas == 1], 'xr')
-            #     plt.plot(xi1[zetas == -1], xi2[zetas == -1], 'xb')
-            #     fig.show()
+            if graphics:
+                fig = plt.figure()
+                t = np.linspace(-3, 3, num=10)
+                if len(Hidden)==0:
+                    for i in range(len(Output)):
+                        outputlines.append(plt.plot(np.arange(10),'b')[0])
+                for i in range(len(Hidden)):
+                    hiddenlines.append(plt.plot(np.arange(10),'--c')[0])
+                plt.xlim([-3, 3])
+                plt.ylim([-3, 3])
+                plt.plot(xi1[zetas == 1], xi2[zetas == 1], 'xr')
+                plt.plot(xi1[zetas == -1], xi2[zetas == -1], 'xb')
+                fig.show()
             n=Network(N,beta,Input,Output,Hidden,eta)
             for iter in range(iterations):
-                xi=xis[int(np.random.randint(0,len(xis)))]
-                zeta=zetas[int(np.random.randint(0,len(zetas)))]
+                index=int(np.random.randint(0,len(xis)))
+                xi=xis[index]
+                zeta=zetas[index]
                 n.trainFF(xi,zeta)
                 if iter%1000==0 or iter>97500:
                     error=n.calcError(zetas,xis)
-                    # if error < np.min(errors):
-                    #     plt.plot((n.outputs[0].bias-n.outputs[0].weights[0]*t)/n.outputs[0].weights[1],t,'--c')
+                    if error < np.min(errors):
+                        for i,ih in enumerate(hiddenlines):
+                            ih.set_ydata((n.hiddens[i].bias-n.hiddens[i].weights[0]*t)/n.hiddens[i].weights[1])
+                            ih.set_xdata(t)
+                        #plt.plot((n.outputs[0].bias - n.outputs[0].weights[0] * t) / n.outputs[0].weights[1], t, '--m')
+                        print 'error: ', error, ' w0: ', n.outputs[0].weights[0] , ' w1: ', n.outputs[0].weights[1], ' bias: ', n.outputs[0].bias
                     errors.append(error)
                     #print n.outputs[0].weights[0],' ',n.outputs[0].weights[1],' ',n.outputs[0].bias
                     print 'iter: ', iter, ' error:', error
-                    # if graphics:
-                    #     line.set_ydata((n.outputs[0].bias-n.outputs[0].weights[0]*t)/n.outputs[0].weights[1])
-                    #     fig.canvas.draw()
+                    if graphics:
+                        for i,io in enumerate(outputlines):
+                            io.set_ydata((n.outputs[i].bias-n.outputs[i].weights[0]*t)/n.outputs[i].weights[1])
+                            io.set_xdata(t)
+                        fig.canvas.draw()
                     
     def __init__(self, part):
+        np.random.seed()
         self.sol[part](self)
 
     sol = {1: solvePartOne,
@@ -224,4 +238,4 @@ class Solution:
 
 
 if __name__ == '__main__':
-    Solution(3)
+    Solution(4)

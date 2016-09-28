@@ -113,6 +113,7 @@ class Network:
             neuron.updateFF(desiredState,hidden=self.hiddens)
         for neuron in self.hiddens:
             neuron.updateFF(desiredState, output=self.outputs)
+
         pass
 
     def calcError(self,zetas=[],xis=[]):

@@ -50,7 +50,7 @@ class Neuron:
         if deterministic:
             self.nextState = np.sign(sumResult-self.bias)
         else:
-            self.rawOutput=np.tanh(self.beta*sumResult-self.bias) # =g(b)
+            self.rawOutput=np.tanh(self.beta*(sumResult-self.bias)) # =g(b)
             if continuous:
                 self.nextState=self.rawOutput
             else:
