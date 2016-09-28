@@ -172,7 +172,8 @@ class Solution:
 
 
     def solvePartFour(self):
-        graphics=True
+        startTime = datetime.now()  # for timing script
+        graphics=False
         iterations=100000
         numTrainings=100
         numHidden=0
@@ -184,12 +185,16 @@ class Solution:
         N=len(Input)+len(Output)+len(Hidden)
         lib=PatternLibrary()
         zetas,xis=lib.loadDataSet("trainingSet.txt")
-        xi1=xis[:,0]
-        xi2=xis[:,1]
-        outputlines=[]
-        hiddenlines=[]
+        validZetas, validXis=lib.loadDataSet("validationSet.txt")
+        xi1, xi2 = xis[:,0], xis[:,1]
+        outputlines, hiddenlines = [], []
+        trainErrors, validErrors = [], []
+        print 'Trainings completed (out of 100):',
+
         for training in range(numTrainings):
-            errors = [1]
+            print training+1
+            minTrainError, minValidError = 1, 1
+
             if graphics:
                 fig = plt.figure()
                 t = np.linspace(-3, 3, num=10)
@@ -203,28 +208,43 @@ class Solution:
                 plt.plot(xi1[zetas == 1], xi2[zetas == 1], 'xr')
                 plt.plot(xi1[zetas == -1], xi2[zetas == -1], 'xb')
                 fig.show()
-            n=Network(N,beta,Input,Output,Hidden,eta)
+
+            n = Network(N, beta, Input, Output, Hidden, eta)
+
             for iter in range(iterations):
-                index=int(np.random.randint(0,len(xis)))
-                xi=xis[index]
-                zeta=zetas[index]
-                n.trainFF(xi,zeta)
-                if iter%1000==0 or iter>97500:
-                    error=n.calcError(zetas,xis)
-                    if error < np.min(errors):
-                        for i,ih in enumerate(hiddenlines):
-                            ih.set_ydata((n.hiddens[i].bias-n.hiddens[i].weights[0]*t)/n.hiddens[i].weights[1])
-                            ih.set_xdata(t)
+                index = int(np.random.randint(0,len(xis)))  # choose random pattern from training set
+                xi, zeta = xis[index], zetas[index]
+                n.trainFF(xi,zeta)  # train network on that pattern
+
+                if iter%1000==0 or iter>99900:
+                    vError = n.calcError(validZetas, validXis)  # error for validation set
+                    tError = n.calcError(zetas, xis)  # error for training set
+                    if vError < minValidError:
+                        minValidError = vError
+                    if tError < minTrainError:
+                        minTrainError = tError;
+                        if graphics:
+                            for i,ih in enumerate(hiddenlines):
+                                ih.set_ydata((n.hiddens[i].bias-n.hiddens[i].weights[0]*t)/n.hiddens[i].weights[1])
+                                ih.set_xdata(t)
+
                         #plt.plot((n.outputs[0].bias - n.outputs[0].weights[0] * t) / n.outputs[0].weights[1], t, '--m')
-                        print 'error: ', error, ' w0: ', n.outputs[0].weights[0] , ' w1: ', n.outputs[0].weights[1], ' bias: ', n.outputs[0].bias
-                    errors.append(error)
+                        #print 'error: ', error, ' w0: ', n.outputs[0].weights[0] , ' w1: ', n.outputs[0].weights[1], ' bias: ', n.outputs[0].bias
                     #print n.outputs[0].weights[0],' ',n.outputs[0].weights[1],' ',n.outputs[0].bias
-                    print 'iter: ', iter, ' error:', error
+                    #print 'iter: ', iter, ' error:', error
                     if graphics:
                         for i,io in enumerate(outputlines):
                             io.set_ydata((n.outputs[i].bias-n.outputs[i].weights[0]*t)/n.outputs[i].weights[1])
                             io.set_xdata(t)
                         fig.canvas.draw()
+
+            trainErrors.append(minTrainError)
+            validErrors.append(minValidError)
+
+        print '\n\nCLASSIFICATION ERROR RESULTS:'
+        print 'Training    --->  Mean Error:', "{:.3f}".format(np.mean(trainErrors)), '  Standard Deviation:', "{:.3f}".format(np.std(trainErrors))
+        print 'Validation  --->  Mean Error:', "{:.3f}".format(np.mean(validErrors)), '  Standard Deviation:', "{:.3f}".format(np.std(validErrors))
+        print '\nIt took ', datetime.now() - startTime, 'to complete this script.'
                     
     def __init__(self, part):
         np.random.seed()
