@@ -154,7 +154,5 @@ class PatternLibrary:
         if normalize:
             xi=xi/np.std(xi)
             xi=xi-np.mean(xi)
-            zeta=zeta/np.std(zeta)
-            zeta=zeta-np.mean(zeta)
         return zeta,xi
 

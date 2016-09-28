@@ -176,8 +176,8 @@ class Solution:
         beta=0.5
         eta=0.01
         Input=[0,1]
-        Hidden=[2,3,4,5]
-        Output=[6]
+        Hidden=[2,3,4,5,6,7]
+        Output=[8]
         N=len(Input)+len(Output)+len(Hidden)
         lib=PatternLibrary()
         zetas,xis=lib.loadDataSet("trainingSet.txt")
@@ -185,12 +185,13 @@ class Solution:
             errors = []
             n=Network(N,beta,Input,Output,Hidden,eta)
             for iter in range(iterations):
-                xi=xis[np.random.randint(0,len(xis))]
-                zeta=zetas[np.random.randint(0,len(zetas))]
+                xi=xis[int(np.random.randint(0,len(xis)))]
+                zeta=zetas[int(np.random.randint(0,len(zetas)))]
                 n.trainFF(xi,zeta)
-                if iter%1000==0 or iter>95000:
+                if iter%1000==0 or iter>97500:
                     error=n.calcError(zetas,xis)
                     errors.append(error)
+                    #print n.outputs[0].weights[0],' ',n.outputs[0].weights[1],' ',n.outputs[0].bias
                     print 'iter: ', iter, ' error:', error
                     
     def __init__(self, part):
