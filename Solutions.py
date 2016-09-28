@@ -176,9 +176,8 @@ class Solution:
         graphics=False
         plotAtEnd=False
         iterations=100000
-        numTrainings=3
+        numTrainings=10
         numHiddenSequence = [0, 2, 4, 8, 16, 32]
-        numHiddenSequence = [0, 2]
         meanTrainErrorSequence = []
         meanValidErrorSequence = []
         beta=0.5
