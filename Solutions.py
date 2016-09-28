@@ -174,77 +174,102 @@ class Solution:
     def solvePartFour(self):
         startTime = datetime.now()  # for timing script
         graphics=False
+        plotAtEnd=False
         iterations=100000
-        numTrainings=100
-        numHidden=0
+        numTrainings=3
+        numHiddenSequence = [0, 2, 4, 8, 16, 32]
+        numHiddenSequence = [0, 2]
+        meanTrainErrorSequence = []
+        meanValidErrorSequence = []
         beta=0.5
         eta=0.01
         Input=range(2)
-        Hidden=range(2,2+numHidden)
-        Output=[2+numHidden]
-        N=len(Input)+len(Output)+len(Hidden)
         lib=PatternLibrary()
         zetas,xis=lib.loadDataSet("trainingSet.txt")
         validZetas, validXis=lib.loadDataSet("validationSet.txt")
         xi1, xi2 = xis[:,0], xis[:,1]
         outputlines, hiddenlines = [], []
-        trainErrors, validErrors = [], []
-        print 'Trainings completed (out of 100):',
 
-        for training in range(numTrainings):
-            print training+1
-            minTrainError, minValidError = 1, 1
+        for numHidden in numHiddenSequence:
+            thisPartStartTime = datetime.now()
+            Hidden = range(2, 2 + numHidden)
+            Output = [2 + numHidden]
+            N = len(Input) + len(Output) + len(Hidden)
+            trainErrors, validErrors = [], []
+            print 'Trainings completed (out of 100):',
 
-            if graphics:
-                fig = plt.figure()
-                t = np.linspace(-3, 3, num=10)
-                if len(Hidden)==0:
-                    for i in range(len(Output)):
-                        outputlines.append(plt.plot(np.arange(10),'b')[0])
-                for i in range(len(Hidden)):
-                    hiddenlines.append(plt.plot(np.arange(10),'--c')[0])
-                plt.xlim([-3, 3])
-                plt.ylim([-3, 3])
-                plt.plot(xi1[zetas == 1], xi2[zetas == 1], 'xr')
-                plt.plot(xi1[zetas == -1], xi2[zetas == -1], 'xb')
-                fig.show()
+            for training in range(numTrainings):
+                minTrainError, minValidError = 1, []
 
-            n = Network(N, beta, Input, Output, Hidden, eta)
+                if graphics:
+                    fig = plt.figure()
+                    t = np.linspace(-3, 3, num=10)
+                    if len(Hidden)==0:
+                        for i in range(len(Output)):
+                            outputlines.append(plt.plot(np.arange(10),'b')[0])
+                    for i in range(len(Hidden)):
+                        hiddenlines.append(plt.plot(np.arange(10),'--c')[0])
+                    plt.xlim([-3, 3])
+                    plt.ylim([-3, 3])
+                    plt.plot(xi1[zetas == 1], xi2[zetas == 1], 'xr')
+                    plt.plot(xi1[zetas == -1], xi2[zetas == -1], 'xb')
+                    fig.show()
 
-            for iter in range(iterations):
-                index = int(np.random.randint(0,len(xis)))  # choose random pattern from training set
-                xi, zeta = xis[index], zetas[index]
-                n.trainFF(xi,zeta)  # train network on that pattern
+                n = Network(N, beta, Input, Output, Hidden, eta)
 
-                if iter%1000==0 or iter>99900:
-                    vError = n.calcError(validZetas, validXis)  # error for validation set
-                    tError = n.calcError(zetas, xis)  # error for training set
-                    if vError < minValidError:
-                        minValidError = vError
-                    if tError < minTrainError:
-                        minTrainError = tError;
+                for iter in range(iterations):
+                    index = int(np.random.randint(0,len(xis)))  # choose random pattern from training set
+                    xi, zeta = xis[index], zetas[index]
+                    n.trainFF(xi,zeta)  # train network on that pattern
+
+                    if iter%1000==0 or iter>99900:
+                        tError = n.calcError(zetas, xis)  # error for training set
+                        if tError < minTrainError:
+                            minTrainError = tError;
+                            minValidError = n.calcError(validZetas, validXis)  # error for validation set
+
+                            if graphics:
+                                for i,ih in enumerate(hiddenlines):
+                                    ih.set_ydata((n.hiddens[i].bias-n.hiddens[i].weights[0]*t)/n.hiddens[i].weights[1])
+                                    ih.set_xdata(t)
+
+                            #plt.plot((n.outputs[0].bias - n.outputs[0].weights[0] * t) / n.outputs[0].weights[1], t, '--m')
+                            #print 'error: ', error, ' w0: ', n.outputs[0].weights[0] , ' w1: ', n.outputs[0].weights[1], ' bias: ', n.outputs[0].bias
+                        #print n.outputs[0].weights[0],' ',n.outputs[0].weights[1],' ',n.outputs[0].bias
+                        #print 'iter: ', iter, ' error:', error
                         if graphics:
-                            for i,ih in enumerate(hiddenlines):
-                                ih.set_ydata((n.hiddens[i].bias-n.hiddens[i].weights[0]*t)/n.hiddens[i].weights[1])
-                                ih.set_xdata(t)
+                            for i,io in enumerate(outputlines):
+                                io.set_ydata((n.outputs[i].bias-n.outputs[i].weights[0]*t)/n.outputs[i].weights[1])
+                                io.set_xdata(t)
+                            fig.canvas.draw()
 
-                        #plt.plot((n.outputs[0].bias - n.outputs[0].weights[0] * t) / n.outputs[0].weights[1], t, '--m')
-                        #print 'error: ', error, ' w0: ', n.outputs[0].weights[0] , ' w1: ', n.outputs[0].weights[1], ' bias: ', n.outputs[0].bias
-                    #print n.outputs[0].weights[0],' ',n.outputs[0].weights[1],' ',n.outputs[0].bias
-                    #print 'iter: ', iter, ' error:', error
-                    if graphics:
-                        for i,io in enumerate(outputlines):
-                            io.set_ydata((n.outputs[i].bias-n.outputs[i].weights[0]*t)/n.outputs[i].weights[1])
-                            io.set_xdata(t)
-                        fig.canvas.draw()
+                trainErrors.append(minTrainError)
+                validErrors.append(minValidError)
+                print training + 1
 
-            trainErrors.append(minTrainError)
-            validErrors.append(minValidError)
+            print '\nHidden Neurons =', numHidden
+            print 'Training    --->  Mean Error:', "{:.3f}".format(np.mean(trainErrors)), '  Standard Deviation:', "{:.3f}".format(np.std(trainErrors))
+            print 'Validation  --->  Mean Error:', "{:.3f}".format(np.mean(validErrors)), '  Standard Deviation:', "{:.3f}".format(np.std(validErrors))
+            print 'This part took: ', datetime.now() - thisPartStartTime
 
-        print '\n\nCLASSIFICATION ERROR RESULTS:'
-        print 'Training    --->  Mean Error:', "{:.3f}".format(np.mean(trainErrors)), '  Standard Deviation:', "{:.3f}".format(np.std(trainErrors))
-        print 'Validation  --->  Mean Error:', "{:.3f}".format(np.mean(validErrors)), '  Standard Deviation:', "{:.3f}".format(np.std(validErrors))
-        print '\nIt took ', datetime.now() - startTime, 'to complete this script.'
+            meanTrainErrorSequence.append(np.mean(trainErrors))
+            meanValidErrorSequence.append(np.mean(validErrors))
+
+        if plotAtEnd:
+            train, = plt.plot(numHiddenSequence, meanTrainErrorSequence, label='Training')
+            valid, = plt.plot(numHiddenSequence, meanValidErrorSequence, label='Validation')
+            plt.legend(handles=[train,valid], loc=1)  # upper right
+            plt.xlabel('number of neurons in hidden layer', fontsize=16)
+            plt.ylabel('classification error', fontsize=16)
+            plt.title('Classification Error for Backpropagation', fontsize=20)
+            plt.show()
+
+        print '\nTotal time passed: ', datetime.now() - startTime
+
+        # for copy-pasting and then plotting
+        print 'meanTrainErrorSequence:', meanTrainErrorSequence
+        print 'meanValidErrorSequence:', meanValidErrorSequence
+
                     
     def __init__(self, part):
         np.random.seed()
