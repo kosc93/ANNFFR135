@@ -2,7 +2,7 @@ from Network import *
 from PatternLibrary import *
 import numpy as np
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 from datetime import datetime
 
@@ -159,8 +159,9 @@ class Solution:
                 for nIteration in range(maxIterations):
                     n.runStochastic(workPattern)
                     workPattern=n.getCurrentNetworkState()
-                    m.append(n.calcMMu(1))
-                mMean.append(np.mean(m[transientLength:]))
+                    if nIteration%25==0:
+                        m.append(n.calcMMu(1))
+                mMean.append(np.mean(m[5:]))
                 # if graphics:
                 #     ax.plot(m)
                 #     animation.canvas.draw()
@@ -186,16 +187,16 @@ class Solution:
         xi2=xis[:,1]
         for training in range(numTrainings):
             errors = [1]
-            if graphics:
-                fig = plt.figure()
-                line, = plt.plot(np.arange(10))
-                t = np.linspace(-1, 1, num=10)
-                line.set_xdata(t)
-                plt.xlim([-3, 3])
-                plt.ylim([-3, 3])
-                plt.plot(xi1[zetas == 1], xi2[zetas == 1], 'xr')
-                plt.plot(xi1[zetas == -1], xi2[zetas == -1], 'xb')
-                fig.show()
+            # if graphics:
+            #     fig = plt.figure()
+            #     line, = plt.plot(np.arange(10))
+            #     t = np.linspace(-1, 1, num=10)
+            #     line.set_xdata(t)
+            #     plt.xlim([-3, 3])
+            #     plt.ylim([-3, 3])
+            #     plt.plot(xi1[zetas == 1], xi2[zetas == 1], 'xr')
+            #     plt.plot(xi1[zetas == -1], xi2[zetas == -1], 'xb')
+            #     fig.show()
             n=Network(N,beta,Input,Output,Hidden,eta)
             for iter in range(iterations):
                 xi=xis[int(np.random.randint(0,len(xis)))]
@@ -203,14 +204,14 @@ class Solution:
                 n.trainFF(xi,zeta)
                 if iter%1000==0 or iter>97500:
                     error=n.calcError(zetas,xis)
-                    if error < np.min(errors):
-                        plt.plot((n.outputs[0].bias-n.outputs[0].weights[0]*t)/n.outputs[0].weights[1],t,'--c')
+                    # if error < np.min(errors):
+                    #     plt.plot((n.outputs[0].bias-n.outputs[0].weights[0]*t)/n.outputs[0].weights[1],t,'--c')
                     errors.append(error)
                     #print n.outputs[0].weights[0],' ',n.outputs[0].weights[1],' ',n.outputs[0].bias
                     print 'iter: ', iter, ' error:', error
-                    if graphics:
-                        line.set_ydata((n.outputs[0].bias-n.outputs[0].weights[0]*t)/n.outputs[0].weights[1])
-                        fig.canvas.draw()
+                    # if graphics:
+                    #     line.set_ydata((n.outputs[0].bias-n.outputs[0].weights[0]*t)/n.outputs[0].weights[1])
+                    #     fig.canvas.draw()
                     
     def __init__(self, part):
         self.sol[part](self)
@@ -223,4 +224,4 @@ class Solution:
 
 
 if __name__ == '__main__':
-    Solution(4)
+    Solution(3)
