@@ -192,7 +192,7 @@ class Solution:
         graphics=False
         plotAtEnd=False
         iterations=100000
-        numTrainings=10
+        numTrainings=100
         numHiddenSequence = [0, 2, 4, 8, 16, 32]
         meanTrainErrorSequence = []
         meanValidErrorSequence = []
