@@ -22,7 +22,7 @@ class Solution:
                 p = ps[pcounter]
                 if p > N:
                     break
-                iterations = 10
+                iterations = 100
                 np.random.seed(seed=int(time.time() % 100))
                 patterns = np.random.random_integers(0, 1, size=(p, N))
                 patterns[patterns == 0] = -1
