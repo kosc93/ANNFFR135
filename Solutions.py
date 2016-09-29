@@ -71,22 +71,22 @@ class Solution:
 
         for iQ, q in enumerate(qSequence):
 
-            # set up animation
-            # if graphics:
-            #     animation = plt.figure()
-            #     title = 'Hopfield Net Asynchronous Updating:  q = ' + str(q)
-            #     plt.title(title)
-            #     ax = animation.gca()
-            #     animation.show()
+            set up animation
+            if graphics:
+                animation = plt.figure()
+                title = 'Hopfield Net Asynchronous Updating:  q = ' + str(q)
+                plt.title(title)
+                ax = animation.gca()
+                animation.show()
 
             net = Network(N)
             net.storePatterns(patterns)
 
             for i, thisInput in enumerate(patterns):
 
-                # if graphics:
-                #     ax.imshow(thisInput.reshape((16, 10)), cmap=plt.cm.binary, interpolation='nearest')
-                #     animation.canvas.draw()
+                if graphics:
+                    ax.imshow(thisInput.reshape((16, 10)), cmap=plt.cm.binary, interpolation='nearest')
+                    animation.canvas.draw()
 
                 for k in range(iterationsForEachPattern):
                     workPattern = net.distortPattern(q, thisInput)
@@ -94,9 +94,9 @@ class Solution:
                         status = net.runDigits(workPattern, thisInput)
                         currentState = net.getCurrentNetworkState()
                         workPattern = currentState
-                        # if graphics:
-                        #     ax.imshow(currentState.reshape((16, 10)), cmap=plt.cm.binary, interpolation='nearest')
-                        #     animation.canvas.draw()
+                        if graphics:
+                            ax.imshow(currentState.reshape((16, 10)), cmap=plt.cm.binary, interpolation='nearest')
+                            animation.canvas.draw()
 
                         if status == 1 or status == 2:
                             probRightResultSequence[iQ] += 1
@@ -106,68 +106,84 @@ class Solution:
 
             print 'q = ', q, ' ---> right: ', 1.0 * probRightResultSequence[iQ] / (iterationsForEachPattern*p)
 
-            # if graphics:
-            #     plt.close("all")
+            if graphics:
+                plt.close("all")
 
         probRightResultSequence = (1.0 / (iterationsForEachPattern * p)) * probRightResultSequence
 
-        # plt.plot(qSequence, probRightResultSequence, lw=3.0)
-        # plt.title('Deterministic Hopfield Pattern Recognition\nPerformance vs. Level of Pattern Distortion')
-        # plt.ylabel('Relative Frequency of Right Pattern Recognition')
-        # plt.xlabel("Probability of 'Flipping' for Each Bit")
-        # print 'It took ', datetime.now() - startTime, 'to complete this script.'
-        # plt.show()
+        plt.plot(qSequence, probRightResultSequence, lw=3.0)
+        plt.title('Deterministic Hopfield Pattern Recognition\nPerformance vs. Level of Pattern Distortion')
+        plt.ylabel('Relative Frequency of Right Pattern Recognition')
+        plt.xlabel("Probability of 'Flipping' for Each Bit")
+        print 'It took ', datetime.now() - startTime, 'to complete this script.'
+        plt.show()
 
     def solvePartThree(self):
         startTime = datetime.now()  # for timing script
-        graphics=False
-        iterationPerPattern=5
+        plotAtEnd = False
+        iterationPerPattern=1
         maxIterations=500
-        N=500
-        N=250
-        N=100
-        N=50
-        p=np.round(np.linspace(1,N,50))
-        p=np.array([1,3,7, 5,10,15,20,25,30, 40, 50, 60, 100,170,250, 300,400, 500])
-        p=np.ceil(p/2.0)
-        p=np.array([1,2,3,4,5,6,7,10,12,15,30,50,70,100])
-        p = np.array([1, 2, 3, 4, 5, 6, 7,8,9, 10, 12, 15, 30, 50])
         beta=2
         transientLength = 200
-        alphaSequence = 1.0 * p / N
-        mSequence = []
-        for pat in p:
-            print "\npatterns:", pat,
-            # set up animation
+        p50 = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 25, 30, 35, 40, 45, 50])
+        p100 = np.array([0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 25, 30, 35, 40, 45, 50])
+        p250 = np.array([0.2, 0.4, 0.6, 0.8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 25, 30, 35, 40, 45, 50])
+        p500 = np.array([0.1, 0.2, 0.3, 0.5, 0.7, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 25, 30, 35, 40, 45, 50])
+        NSequence = np.array([50, 100, 250, 500])
+        pSequence = np.array([p50, 2*p100, 5*p250, 10*p500])
 
-            # if graphics:
-            #     animation = plt.figure()
-            #     title = 'Compute order parameter m1:  alpha = ' + str(pat*1.0/N)
-            #     plt.title(title)
-            #     ax = animation.gca()
-            #     animation.show()
-            mMean=[]
-            print '---> iteration: ',
-            for pIteration in range(iterationPerPattern):
-                print pIteration + 1,
-                m = []
-                patterns = np.random.random_integers(0, 1, size=(int(pat), N))
-                patterns[patterns == 0] = -1
-                n = Network(N,beta)
-                n.storePatterns(patterns)
-                workPattern=patterns[0]
-                for nIteration in range(maxIterations):
-                    n.runStochastic(workPattern)
-                    workPattern=n.getCurrentNetworkState()
-                    if nIteration%25==0:
-                        m.append(n.calcMMu(1))
-                mMean.append(np.mean(m[5:]))
-                # if graphics:
-                #     ax.plot(m)
-                #     animation.canvas.draw()
-            mSequence.append(np.mean(mMean))
-            #print datetime.now() - startTime #shoudl not be printed because it would ruin the file for matlab
-            print 'alpha:', pat*1.0/N, ' m: ' , np.mean(mMean)
+        alphaSequence50 = 1.0 * pSequence[0] / NSequence[0]
+        alphaSequence100 = 1.0 * pSequence[1] / NSequence[1]
+        alphaSequence250 = 1.0 * pSequence[2] / NSequence[2]
+        alphaSequence500 = 1.0 * pSequence[3] / NSequence[3]
+        mForPlot = []
+        for thisPIndex, thisN in enumerate(NSequence):
+            mSequence = []
+            print '\nthisN =', thisN
+            thisP = pSequence[thisPIndex]
+            for pat in thisP:
+                print "patterns:", pat,
+                mMean=[]
+                print '---> iteration:',
+                for pIteration in range(iterationPerPattern):
+                    print pIteration + 1,
+                    m = []
+                    patterns = np.random.random_integers(0, 1, size=(int(pat), thisN))
+                    patterns[patterns == 0] = -1
+                    n = Network(thisN, beta)
+                    n.storePatterns(patterns)
+                    workPattern=patterns[0]
+                    for nIteration in range(maxIterations):
+                        n.runStochastic(workPattern)
+                        workPattern = n.getCurrentNetworkState()
+                        if nIteration >= transientLength:
+                            m.append(n.calcMMu(1))
+                    mMean.append(np.mean(m))
+                mSequence.append(np.mean(mMean))
+                print 'alpha:', pat*1.0/thisN, ' m:', np.mean(mMean),
+                print datetime.now() - startTime
+            mForPlot.append(mSequence)
+
+        print 'alphaSequence50:', pprint.pprint(alphaSequence50)
+        print 'alphaSequence100:', pprint.pprint(alphaSequence100)
+        print 'alphaSequence250:', pprint.pprint(alphaSequence250)
+        print 'alphaSequence500:', pprint.pprint(alphaSequence500)
+        print 'mForPlot[0]', mForPlot[0]
+        print 'mForPlot[1]', mForPlot[1]
+        print 'mForPlot[2]', mForPlot[2]
+        print 'mForPlot[3]', mForPlot[3]
+
+        if plotAtEnd:
+            N50, = plt.plot(alphaSequence50, mForPlot[0], label='N = 50')
+            N100, = plt.plot(alphaSequence100, mForPlot[1], label='N = 100')
+            N250, = plt.plot(alphaSequence250, mForPlot[2], label='N = 250')
+            N500, = plt.plot(alphaSequence500, mForPlot[3], label='N = 500')
+            plt.legend(handles=[N50, N100, N250, N500], loc=1) #upper right
+            plt.xlabel(r'$\alpha$', fontsize=18)
+            plt.ylabel(r'$m$', fontsize=18)
+            plt.title(r'Order parameter $m$ as a function of $\alpha = p/N$', fontsize=14)
+            plt.show()
+
         print 'It took ', datetime.now() - startTime, 'to complete this script.'
 
 
@@ -231,11 +247,10 @@ class Solution:
                                 for i,ih in enumerate(hiddenlines):
                                     ih.set_ydata((n.hiddens[i].bias-n.hiddens[i].weights[0]*t)/n.hiddens[i].weights[1])
                                     ih.set_xdata(t)
+                            if graphics:
+                                plt.plot((n.outputs[0].bias - n.outputs[0].weights[0] * t) / n.outputs[0].weights[1], t, '--m')
+                                print 'error: ', error, ' w0: ', n.outputs[0].weights[0] , ' w1: ', n.outputs[0].weights[1], ' bias: ', n.outputs[0].bias
 
-                            #plt.plot((n.outputs[0].bias - n.outputs[0].weights[0] * t) / n.outputs[0].weights[1], t, '--m')
-                            #print 'error: ', error, ' w0: ', n.outputs[0].weights[0] , ' w1: ', n.outputs[0].weights[1], ' bias: ', n.outputs[0].bias
-                        #print n.outputs[0].weights[0],' ',n.outputs[0].weights[1],' ',n.outputs[0].bias
-                        #print 'iter: ', iter, ' error:', error
                         if graphics:
                             for i,io in enumerate(outputlines):
                                 io.set_ydata((n.outputs[i].bias-n.outputs[i].weights[0]*t)/n.outputs[i].weights[1])
@@ -264,12 +279,7 @@ class Solution:
             plt.show()
 
         print '\nTotal time passed: ', datetime.now() - startTime
-
-        # for copy-pasting and then plotting
-        print 'meanTrainErrorSequence:', meanTrainErrorSequence
-        print 'meanValidErrorSequence:', meanValidErrorSequence
-
-                    
+            
     def __init__(self, part):
         np.random.seed()
         self.sol[part](self)
